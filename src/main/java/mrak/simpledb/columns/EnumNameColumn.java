@@ -6,8 +6,8 @@ import java.sql.ResultSet;
 
 public class EnumNameColumn extends Column {
 
-	public EnumNameColumn(String n, Field f, boolean key, boolean foreignKey) {
-		super(n, f, key, foreignKey);
+	public EnumNameColumn(String n, Field f, boolean key, boolean generatedValue, boolean foreignKey) {
+		super(n, f, key, generatedValue, foreignKey);
 	}
 
 	@Override

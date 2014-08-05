@@ -6,8 +6,8 @@ import java.sql.ResultSet;
 
 public class IntegerColumn extends Column {
 
-	public IntegerColumn(String n, Field f, boolean key, boolean foreignKey) {
-		super(n, f, key, foreignKey);
+	public IntegerColumn(String n, Field f, boolean key, boolean generatedValue, boolean foreignKey) {
+		super(n, f, key, generatedValue, foreignKey);
 	}
 
 	@Override

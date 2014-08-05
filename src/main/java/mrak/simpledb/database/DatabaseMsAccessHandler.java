@@ -8,7 +8,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class DatabaseMsAccessHandler implements DatabaseHandler {
-
+	
+	private final String DRIVER = "sun.jdbc.odbc.JdbcOdbcDriver";
 	private final String ACCESS_CONNSTR = 
 			"jdbc:odbc:DRIVER={Microsoft Access Driver (*.mdb, *.accdb)};DBQ=%s;DriverID=22;READONLY=true}";
 	
@@ -16,10 +17,14 @@ public class DatabaseMsAccessHandler implements DatabaseHandler {
 	private final String databaseURL;
 	
 	public DatabaseMsAccessHandler(String databaseFilePath) throws Exception {
-		if(!new File(databaseFilePath).exists()) {
+		
+		File dataBaseFile = new File(databaseFilePath);
+		if(!dataBaseFile.exists()) {
 			throw new IllegalArgumentException("Database " + databaseFilePath + " doesn't exist");
 		}
-		databaseURL = String.format(ACCESS_CONNSTR, databaseFilePath);
+		
+		Class.forName(DRIVER);
+		databaseURL = String.format(ACCESS_CONNSTR, dataBaseFile.getAbsolutePath());
 	}
 	
 	private Connection getConnection() throws SQLException {
@@ -46,7 +51,7 @@ public class DatabaseMsAccessHandler implements DatabaseHandler {
 
 	@Override
 	public ResultSet retrieveGeneratedKeys(PreparedStatement ps) throws Exception {
-		ResultSet keys = ps.executeQuery("SELECT @@IDENTITY;");
+		ResultSet keys = prepareStatement("SELECT @@IDENTITY;").executeQuery(); //ps.executeQuery("SELECT @@IDENTITY;");
 		keys.next();
 		return keys;
 	}

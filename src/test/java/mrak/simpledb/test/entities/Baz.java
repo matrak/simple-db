@@ -3,6 +3,7 @@ package mrak.simpledb.test.entities;
 import java.sql.Date;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
@@ -12,6 +13,7 @@ import javax.persistence.Table;
 public class Baz {
 	
 	@Id
+	@GeneratedValue
 	public Integer id;
 	
 	public Date created;

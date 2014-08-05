@@ -15,7 +15,7 @@ import mrak.simpledb.query.constrains.ConstrainWithConnector;
 
 public class Query<B> {
 
-	public static boolean DEBUG = false;
+	public static boolean DEBUG = true;
 	
 	private final Mapping<B> map;
 	private final DatabaseHandler database;
@@ -41,11 +41,11 @@ public class Query<B> {
 		List<Column> columns = map.getColumns();
 		for (Column column : columns) {
 			
-			if(column.isGeneratedId()) {
+			if(column.isGeneratedValue()) {
 				generateId = true;
 			}
 			
-			if(column.isKey() && column.isGeneratedId()) {
+			if(column.isKey() && column.isGeneratedValue()) {
 				continue;
 			}
 			else {
@@ -67,11 +67,12 @@ public class Query<B> {
 		
 		int index = 1;
 		for (Column column : columns) {
-			if(column.isKey() && column.isGeneratedId()) {
+			if(column.isKey() && column.isGeneratedValue()) {
 				continue;
 			}
 			else {
 				Object value = columnValues.get((index - 1));
+				sysout(column.getName(), value);
 				column.setPreparedStatementValue(ps, index++, value);	
 			}
 		}
@@ -240,7 +241,7 @@ public class Query<B> {
 		ps.getConnection().close();
 	}
 	
-	private void sysout(String method, String s) {
+	private void sysout(String method, Object s) {
 		System.out.print("Query->" + method + " :");
 		System.out.println(s);
 	}

@@ -37,10 +37,10 @@ public enum ColumnType {
 		return shortTypeName;
 	}
 	
-	public Column createColumn(String name, Field field, boolean isId, boolean isFk) throws Exception
+	public Column createColumn(String name, Field field, boolean isId, boolean isGeneratedValue, boolean isFk) throws Exception
 	{
 		Constructor<?> constructor = this.columnClazz.getConstructors()[0];
-		return (Column) constructor.newInstance(name, field, isId, isFk);
+		return (Column) constructor.newInstance(name, field, isId, isGeneratedValue, isFk);
 	}
 	
 	public static ColumnType associatedType(Field f) 

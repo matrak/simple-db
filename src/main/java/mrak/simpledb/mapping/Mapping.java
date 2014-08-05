@@ -45,7 +45,7 @@ public abstract class Mapping<B> {
 	}
 	
 	protected void addColumn(Column column) {
-		columnNameToColumn.put(column.getName(), column);
+		columnNameToColumn.put(column.getField().getName(), column);
 		columns.add(column);
 	}
 	

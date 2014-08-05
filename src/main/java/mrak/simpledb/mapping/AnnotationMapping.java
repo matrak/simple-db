@@ -1,11 +1,10 @@
 package mrak.simpledb.mapping;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -86,12 +85,14 @@ public abstract class AnnotationMapping<B> extends Mapping<B> {
 			}
 
 			boolean id = isId(field);
+			boolean generatedValue = isGeneratedValue(field);
 			boolean fk = isForeignKey(field);
 			
 			ColumnType columnType = getAssociatedType(fk, field);
+			// FIXME @Column annotation!
 			String columnName = naming.getColumnName(columnType, field.getName());
 			
-			addColumn(columnType.createColumn(columnName, field, id, fk));
+			addColumn(columnType.createColumn(columnName, field, id, generatedValue, fk));
 		}
 	}
 	
@@ -103,6 +104,10 @@ public abstract class AnnotationMapping<B> extends Mapping<B> {
 	private boolean isForeignKey(Field f) {
 		return f.getAnnotation(ManyToOne.class) != null || 
 				f.getAnnotation(ManyToMany.class) != null;
+	}
+	
+	private boolean isGeneratedValue(Field f) {
+		return f.getAnnotation(GeneratedValue.class) != null;
 	}
 	
 	private boolean isId(Field f) {
@@ -118,6 +123,4 @@ public abstract class AnnotationMapping<B> extends Mapping<B> {
 		
 		return ColumnType.associatedType(field);
 	}
-	
-	
 }

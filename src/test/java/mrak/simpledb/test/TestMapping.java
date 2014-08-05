@@ -3,11 +3,13 @@ package mrak.simpledb.test;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
 import java.sql.ResultSet;
 import java.util.List;
 
+import mrak.simpledb.columns.Column;
 import mrak.simpledb.database.DatabaseHandler;
 import mrak.simpledb.database.DatabaseMsAccessHandler;
 import mrak.simpledb.mapping.AnnotationMapping;
@@ -31,6 +33,9 @@ public class TestMapping {
 				bean.id = key;
 			}
 		};
+
+		Column idColumn = foobarMapping.getColumnForFieldName("id");
+		assertTrue(idColumn.isKey());
 		
 		URL databaseURL = TestMapping.class.getResource("/office-2010-foobar_baz.accdb");
 		DatabaseHandler database = new DatabaseMsAccessHandler(databaseURL.getFile());

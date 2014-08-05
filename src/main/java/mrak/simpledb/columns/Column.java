@@ -11,15 +11,14 @@ public abstract class Column {
 	private final Field field;
 	
 	private final boolean key;
-	private final boolean generatedId;
+	private final boolean generatedValue;
 	private final boolean foreignKey;
 	
-	public Column(String name, Field field, boolean key, boolean foreignKey) {
+	public Column(String name, Field field, boolean key, boolean generatedValue, boolean foreignKey) {
 		this.name = name;
 		this.field = field;
 		this.key = key;
-		// FIXME generatedId
-		this.generatedId = false;
+		this.generatedValue = generatedValue;
 		this.foreignKey = foreignKey;
 	}
 	
@@ -35,8 +34,8 @@ public abstract class Column {
 		return key;
 	}
 	
-	public boolean isGeneratedId() {
-		return generatedId;
+	public boolean isGeneratedValue() {
+		return generatedValue;
 	}
 	
 	public boolean isForeignKey() {

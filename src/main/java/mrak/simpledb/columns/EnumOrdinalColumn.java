@@ -6,8 +6,8 @@ import java.sql.ResultSet;
 
 public class EnumOrdinalColumn extends Column {
 
-	public EnumOrdinalColumn(String n, Field f, boolean key, boolean foreignKey) {
-		super(n, f, key, foreignKey);
+	public EnumOrdinalColumn(String n, Field f, boolean key, boolean generatedValue, boolean foreignKey) {
+		super(n, f, key, generatedValue, foreignKey);
 	}
 
 	@Override

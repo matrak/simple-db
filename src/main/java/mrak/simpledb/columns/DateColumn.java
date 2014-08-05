@@ -7,8 +7,8 @@ import java.sql.ResultSet;
 
 public class DateColumn extends Column {
 
-	public DateColumn(String n, Field f, boolean key, boolean foreignKey) {
-		super(n, f, key, foreignKey);
+	public DateColumn(String n, Field f, boolean key, boolean generatedValue, boolean foreignKey) {
+		super(n, f, key, generatedValue, foreignKey);
 	}
 
 	@Override

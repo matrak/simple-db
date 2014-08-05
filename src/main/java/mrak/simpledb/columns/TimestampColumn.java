@@ -7,8 +7,8 @@ import java.sql.Timestamp;
 
 public class TimestampColumn extends Column {
 
-	public TimestampColumn(String n, Field f, boolean key, boolean foreignKey) {
-		super(n, f, key, foreignKey);
+	public TimestampColumn(String n, Field f, boolean key, boolean generatedValue, boolean foreignKey) {
+		super(n, f, key, generatedValue, foreignKey);
 	}
 
 	@Override
