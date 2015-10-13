@@ -1,0 +1,3 @@
+Placeholder for the UCanAccess-3.0.1 lib which is in .gitignore
+Unfortunately there is no maven dependency for UCanAccess; 
+For the test, it's added manually to the classpath. 

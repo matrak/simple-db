@@ -2,7 +2,7 @@ package mrak.simpledb.query.constrains;
 
 import mrak.simpledb.columns.Column;
 
-public class Constrain<V> {
+public class Constrain<V> implements ConstrainChainPart {
 	
 	private Column column;
 	V value;
@@ -31,6 +31,11 @@ public class Constrain<V> {
 	
 	public Operator getOperator() {
 		return operator;
+	}
+
+	@Override
+	public ConstrainChainPartType getPartType() {
+		return ConstrainChainPartType.CONSTRAIN;
 	}
 
 	

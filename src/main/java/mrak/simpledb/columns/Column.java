@@ -4,6 +4,8 @@ import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import mrak.simpledb.mapping.Mapping;
+
 // FIXME hash and equals
 public abstract class Column {
 	
@@ -51,6 +53,10 @@ public abstract class Column {
 	abstract public void setEntityValue(ResultSet rs, int index, Object entity) throws Exception;
 
 	abstract public void setPreparedStatementValue(PreparedStatement ps, int index, Object val) throws Exception;
+	
+	public static Column get(Mapping<?> m, String fieldName) {
+		return m.getColumnForFieldName(fieldName);
+	}
 	
 	@Override
 	public String toString() {

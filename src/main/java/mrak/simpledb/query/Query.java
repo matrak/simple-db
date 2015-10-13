@@ -3,15 +3,14 @@ package mrak.simpledb.query;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Vector;
 
 import mrak.simpledb.columns.Column;
 import mrak.simpledb.database.DatabaseHandler;
 import mrak.simpledb.mapping.Mapping;
+import mrak.simpledb.query.constrains.Constrain;
 import mrak.simpledb.query.constrains.ConstrainChain;
-import mrak.simpledb.query.constrains.ConstrainWithConnector;
 
 public class Query<B> {
 
@@ -20,13 +19,24 @@ public class Query<B> {
 	private final Mapping<B> map;
 	private final DatabaseHandler database;
 	
+	private int firstRow;
+	private int maxRows;
+	
 	public Query(DatabaseHandler handler, Mapping<B> m) {
 		this.map = m;
 		this.database = handler;
 	}
 	
+	public void setFirstRow(int firstRow) {
+		this.firstRow = firstRow;
+	}
+	
+	public void setMaxRows(int maxRows) {
+		this.maxRows = maxRows;
+	}
+	
 	public void insert(B bean) throws Exception {
-				
+
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO ")
 		   .append(map.getTableName())
@@ -63,6 +73,8 @@ public class Query<B> {
 		
 		sql.append(sqlValues);
 		
+		sysout("insert", sql.toString());
+		
 		PreparedStatement ps = database.prepareInsert(generateId, sql.toString());
 		
 		int index = 1;
@@ -72,7 +84,6 @@ public class Query<B> {
 			}
 			else {
 				Object value = columnValues.get((index - 1));
-				sysout(column.getName(), value);
 				column.setPreparedStatementValue(ps, index++, value);	
 			}
 		}
@@ -98,7 +109,7 @@ public class Query<B> {
 		}
 	}
 	
-	public List<B> select(ConstrainChain<B> constrains, OrderBy order, Column... orderBy) throws Exception {
+	public List<B> select(ConstrainChain<B> constrains, OrderBy... orderBy) throws Exception {
 		
 		List<Column> columns = map.getColumns();
 		StringBuilder sql = new StringBuilder();
@@ -114,23 +125,20 @@ public class Query<B> {
 		
 		if(orderBy != null && orderBy.length > 0) {
 			sql.append(" ORDER BY ");
-			appendColumnNames(Arrays.asList(orderBy), sql);
-			
-			if(order != null) {
-				sql.append(" ").append(order.name());
+			for (OrderBy ob : orderBy) {
+				sql.append(ob.getColumn().getName()).append(ob.isAsc() ? "ASC" : "DESC").append(",");
 			}
+			sql.deleteCharAt(sql.length()-1);
 		}
-	
-		if(DEBUG) {
-			sysout("select", sql);
-		}
+		
+		sysout("select", sql);
 		
 		PreparedStatement ps = database.prepareStatement(sql.toString());
 		if(constrains != null && constrains.hasConstrains()) {
 			int index = 1;
-			for (ConstrainWithConnector<B> con : constrains) {
-				Column c = con.getConstrain().getColumn();
-				c.setPreparedStatementValue(ps, index++, con.getConstrain().getValue());
+			for (Constrain<B> con : constrains.getConstrains()) {
+				Column c = con.getColumn();
+				c.setPreparedStatementValue(ps, index++, con.getValue());
 			}
 		}
 		
@@ -156,10 +164,6 @@ public class Query<B> {
 		b.deleteCharAt(b.length()-1);
 	}
 	
-	public List<B> select(ConstrainChain<B> c) throws Exception {
-		return select(c, null);
-	}
-	
 	public void delete(B bean) throws Exception {
 		
 		StringBuilder sql = new StringBuilder();
@@ -178,9 +182,7 @@ public class Query<B> {
 		}
 		sql.delete(sql.length()- " AND ".length(), sql.length());
 		
-		if(DEBUG) {
-			sysout("select", sql);
-		}
+		sysout("select", sql);
 		
 		PreparedStatement ps = database.prepareStatement(sql.toString());
 		
@@ -192,8 +194,30 @@ public class Query<B> {
 		ps.executeUpdate();
 	}
 	
-	public void delete(B bean, ConstrainChain<B> cons) throws Exception {
-		throw new Error("NOT IMPLEMENTED");
+	public void delete(ConstrainChain<B> constrains) throws Exception {
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("DELETE FROM ");
+		sql.append(map.getTableName());
+
+		if(constrains != null && constrains.hasConstrains()) {
+			sql.append(" WHERE ");
+			constrains.appendConstrains(sql, false);
+		}
+
+		sysout("delete", sql);
+		
+		PreparedStatement ps = database.prepareStatement(sql.toString());
+		
+		if(constrains != null && constrains.hasConstrains()) {
+			int index = 1;
+			for (Constrain<B> con : constrains.getConstrains()) {
+				Column c = con.getColumn();
+				c.setPreparedStatementValue(ps, index++, con.getValue());
+			}
+		}
+		
+		ps.executeUpdate();		
 	}
 	
 	public void update(B bean) throws Exception {
@@ -218,9 +242,7 @@ public class Query<B> {
 		sql.deleteCharAt(sql.length()-1);
 		sql.append(" WHERE ").append(where.substring(0, where.length() - " AND ".length()));
 		
-		if(DEBUG) {
-			sysout("select", sql);
-		}
+		sysout("select", sql);
 		
 		PreparedStatement ps = database.prepareStatement(sql.toString());
 		
@@ -242,8 +264,10 @@ public class Query<B> {
 	}
 	
 	private void sysout(String method, Object s) {
-		System.out.print("Query->" + method + " :");
-		System.out.println(s);
+		if(DEBUG) {
+			System.out.print("Query->" + method + " :");
+			System.out.println(s);
+		}
 	}
 
 	private void sysout(String method, StringBuilder s) {
