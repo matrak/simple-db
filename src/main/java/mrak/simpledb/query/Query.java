@@ -109,6 +109,36 @@ public class Query<B> {
 		}
 	}
 	
+	public long count(ConstrainChain<B> constrains) throws Exception 
+	{
+		StringBuilder sql = new StringBuilder();
+		List<Column> keys = map.getKeyColumns();
+		sql.append("SELECT COUNT(");
+		appendColumnNames(keys, sql);
+		sql.append(") FROM ").append(map.getTableName());
+		
+		if(constrains != null && constrains.hasConstrains()) {
+			sql.append(" WHERE ");
+			constrains.appendConstrains(sql, false);
+		}
+		
+		sysout("count", sql);
+		
+		PreparedStatement ps = database.prepareStatement(sql.toString());
+		if(constrains != null && constrains.hasConstrains()) {
+			int index = 1;
+			for (Constrain<B> con : constrains.getConstrains()) {
+				Column c = con.getColumn();
+				c.setPreparedStatementValue(ps, index++, con.getValue());
+			}
+		}
+		
+		ResultSet rs = ps.executeQuery();
+		rs.next();
+		long count = rs.getLong(1);
+		return count;
+	}
+	
 	public List<B> select(ConstrainChain<B> constrains, OrderBy... orderBy) throws Exception {
 		
 		List<Column> columns = map.getColumns();

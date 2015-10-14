@@ -2,6 +2,7 @@ package mrak.simpledb.mapping;
 
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,14 @@ public abstract class Mapping<B> {
 	protected Mapping(String tableName, AccessType accessType) {
 		this.tableName = tableName;
 		this.accessType = accessType;
+	}
+	
+	public List<Column> getKeyColumns() {
+		List<Column> keys = new ArrayList<>();
+		for(Column c : columns) {
+			if(c.isKey()) keys.add(c);
+		}
+		return keys;
 	}
 	
 	public Column getColumnFor(Field f) {

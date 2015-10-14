@@ -37,7 +37,7 @@ public class MsAccessCRUDTest {
 	};
 	
 	@Test
-	@Ignore
+	//@Ignore
 	public void testMapping() throws Exception 
 	{
 		Column idColumn = Column.get(FOO_BAR_MAPPING, "id");
@@ -56,7 +56,9 @@ public class MsAccessCRUDTest {
 		ConstrainChain<FooBar> selectById = new ConstrainChain<>(FOO_BAR_MAPPING);
 		selectById.add(new Constrain<Integer>(Column.get(FOO_BAR_MAPPING, "id"), insertFooBar.id));
 		List<FooBar> selectedFooBarList = foobarQuery.select(selectById);
+		long selectByIdCount = foobarQuery.count(selectById);
 		
+		assertSame(selectByIdCount, 1L);
 		assertThat(selectedFooBarList.size(), is(1));
 		FooBar selectedFoBar = selectedFooBarList.get(0);
 		assertSame(insertFooBar.id, selectedFoBar.id);
