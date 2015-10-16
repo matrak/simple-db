@@ -24,4 +24,17 @@ public class FooBar {
 	@OneToMany
 	public List<Baz> bazs;
 	
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder("FooBar {\n");
+		b.append("\t id: ").append(id).append(",\n");
+		b.append("\t testString: ").append(testString).append(",\n");
+		b.append("\t testBoolean: ").append(testBoolean).append(",\n");
+		b.append("\t enumValue: ").append(enumValue).append(",\n");
+		b.append("\t bazs: ").append(bazs != null ? bazs.size() : null).append(",\n");
+		b.append("}");
+		return b.toString();
+	}
+	
+	
 }

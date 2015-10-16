@@ -6,8 +6,8 @@ import java.sql.ResultSet;
 
 public class IntegerColumn extends Column {
 
-	public IntegerColumn(String n, Field f, boolean key, boolean generatedValue, boolean foreignKey) {
-		super(n, f, key, generatedValue, foreignKey);
+	public IntegerColumn(String n, Field f, Field embedded, boolean key, boolean generatedValue, boolean foreignKey) {
+		super(n, f, embedded, key, generatedValue, foreignKey);
 	}
 
 	@Override
@@ -26,7 +26,14 @@ public class IntegerColumn extends Column {
 			ps.setNull(index, java.sql.Types.INTEGER);
 		}
 		else {
-			ps.setInt(index, (Integer) val);	
+			int i;
+			if(val instanceof Long) {
+				i = ((Long) val).intValue();
+			}
+			else {
+				i = (int) val;
+			}
+			ps.setInt(index, i);	
 		}
 	}
 }

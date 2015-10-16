@@ -6,8 +6,8 @@ import java.sql.ResultSet;
 
 public class BooleanColumn extends Column {
 
-	public BooleanColumn(String n, Field f, boolean key, boolean generatedValue, boolean foreignKey) {
-		super(n, f, key, generatedValue, foreignKey);
+	public BooleanColumn(String n, Field f, Field embedded, boolean key, boolean generatedValue, boolean foreignKey) {
+		super(n, f, embedded, key, generatedValue, foreignKey);
 	}
 
 	@Override

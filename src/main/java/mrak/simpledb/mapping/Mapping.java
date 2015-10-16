@@ -16,13 +16,15 @@ public abstract class Mapping<B> {
 	
 	private final String tableName;
 	private final AccessType accessType;
+	private final Class<B> beanClass;
 	
 	private final Map<String, Column> columnNameToColumn = new HashMap<String, Column>();
 	private final List<Column> columns = new Vector<Column>();
 		
-	protected Mapping(String tableName, AccessType accessType) {
+	protected Mapping(Class<B> beanClass, String tableName, AccessType accessType) {
 		this.tableName = tableName;
 		this.accessType = accessType;
+		this.beanClass = beanClass;
 	}
 	
 	public List<Column> getKeyColumns() {
@@ -31,6 +33,10 @@ public abstract class Mapping<B> {
 			if(c.isKey()) keys.add(c);
 		}
 		return keys;
+	}
+	
+	public Class<B> getBeanClass() {
+		return beanClass;
 	}
 	
 	public Column getColumnFor(Field f) {

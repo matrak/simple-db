@@ -2,20 +2,14 @@ package mrak.simpledb.database;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.HashMap;
+import java.util.Map;
 
-public class DatabaseDefaultHandler implements DatabaseHandler {
+import mrak.simpledb.mapping.Mapping;
 
-	@Override
-	public PreparedStatement prepareStatement(String sql) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+public abstract class DatabaseDefaultHandler implements DatabaseHandler {
 
-	@Override
-	public PreparedStatement prepareStatement(String string, int options) throws Exception {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	protected Map<Class<?>, Mapping<?>> mappings = new HashMap<Class<?>, Mapping<?>>();
 
 	@Override
 	public PreparedStatement prepareInsert(boolean generateId, String sql) throws Exception {
@@ -25,6 +19,17 @@ public class DatabaseDefaultHandler implements DatabaseHandler {
 	@Override
 	public ResultSet retrieveGeneratedKeys(PreparedStatement ps) throws Exception {
 		return ps.getGeneratedKeys();
+	}
+	
+	@Override
+	public <M> void registerMapping(Class<M> clazz, Mapping<M> mapping) {
+		mappings.put(clazz, mapping);
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public <M> Mapping<M> getMapping(Class<M> clazz) {
+		return (Mapping<M>) mappings.get(clazz);
 	}
 	
 }

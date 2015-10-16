@@ -1,19 +1,17 @@
 package mrak.simpledb.test;
 
+import static mrak.simpledb.test.Mappings.FOO_BAR;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.net.URL;
-import java.sql.ResultSet;
 import java.util.List;
 
 import mrak.simpledb.columns.Column;
 import mrak.simpledb.database.DatabaseHandler;
 import mrak.simpledb.database.DatabaseUCanAccessHandler;
-import mrak.simpledb.mapping.AnnotationMapping;
-import mrak.simpledb.mapping.Mapping;
 import mrak.simpledb.query.Query;
 import mrak.simpledb.query.constrains.Constrain;
 import mrak.simpledb.query.constrains.ConstrainChain;
@@ -24,28 +22,20 @@ import org.junit.Test;
 
 /**
  * (!) UCanAccess has to be added to the classpath
+ * (otherwise the test will fail)
  */
 public class MsAccessCRUDTest {
 	
-	static final Mapping<FooBar> FOO_BAR_MAPPING = new AnnotationMapping<FooBar>(FooBar.class) {
-		
-		@Override
-		public void setGeneratedKeys(FooBar bean, ResultSet keys) throws Exception {
-			int key = keys.getInt(1);
-			bean.id = key;
-		}
-	};
-	
 	@Test
-	//@Ignore
+	@Ignore
 	public void testMapping() throws Exception 
 	{
-		Column idColumn = Column.get(FOO_BAR_MAPPING, "id");
+		Column idColumn = Column.get(FOO_BAR, "id");
 		assertTrue(idColumn.isKey());
 		
-		URL databaseURL = MsAccessCRUDTest.class.getResource("/office-2010-foobar_baz.accdb");
-		DatabaseHandler database = new DatabaseUCanAccessHandler(databaseURL.getFile());
-		Query<FooBar> foobarQuery = new Query<>(database, FOO_BAR_MAPPING);
+		DatabaseHandler database = Mappings.DB;
+		database.registerMapping(FooBar.class, FOO_BAR);
+		Query<FooBar> foobarQuery = new Query<>(database, FooBar.class);
 		
 		FooBar insertFooBar = new FooBar();
 		insertFooBar.testBoolean = Boolean.FALSE;
@@ -53,8 +43,8 @@ public class MsAccessCRUDTest {
 		foobarQuery.insert(insertFooBar);
 		
 		// test select by id
-		ConstrainChain<FooBar> selectById = new ConstrainChain<>(FOO_BAR_MAPPING);
-		selectById.add(new Constrain<Integer>(Column.get(FOO_BAR_MAPPING, "id"), insertFooBar.id));
+		ConstrainChain<FooBar> selectById = new ConstrainChain<>(FOO_BAR);
+		selectById.add(new Constrain<Integer>(Column.get(FOO_BAR, "id"), insertFooBar.id));
 		List<FooBar> selectedFooBarList = foobarQuery.select(selectById);
 		long selectByIdCount = foobarQuery.count(selectById);
 		
@@ -64,19 +54,19 @@ public class MsAccessCRUDTest {
 		assertSame(insertFooBar.id, selectedFoBar.id);
 		
 		// test select by string
-		ConstrainChain<FooBar> selectByTestString = new ConstrainChain<>(FOO_BAR_MAPPING);
-		selectByTestString.add(new Constrain<String>(Column.get(FOO_BAR_MAPPING, "testString"), insertFooBar.testString));
+		ConstrainChain<FooBar> selectByTestString = new ConstrainChain<>(FOO_BAR);
+		selectByTestString.add(new Constrain<String>(Column.get(FOO_BAR, "testString"), insertFooBar.testString));
 		List<FooBar> selectByTestStringList = foobarQuery.select(selectByTestString);
 		
 		selectedFoBar = selectByTestStringList.get(0);
 		assertSame(insertFooBar.testString, insertFooBar.testString);
 		
 		// test select by string and id
-		ConstrainChain<FooBar> selectByTestStringAndId = new ConstrainChain<>(FOO_BAR_MAPPING);
+		ConstrainChain<FooBar> selectByTestStringAndId = new ConstrainChain<>(FOO_BAR);
 		selectByTestStringAndId
-			.add(new Constrain<String>(Column.get(FOO_BAR_MAPPING, "testString"), insertFooBar.testString))
+			.add(new Constrain<String>(Column.get(FOO_BAR, "testString"), insertFooBar.testString))
 			.and()
-			.add(new Constrain<Integer>(Column.get(FOO_BAR_MAPPING, "id"), insertFooBar.id));
+			.add(new Constrain<Integer>(Column.get(FOO_BAR, "id"), insertFooBar.id));
 			
 		List<FooBar> selectByTestStringAndIdList = foobarQuery.select(selectByTestStringAndId);
 		

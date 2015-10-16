@@ -1,6 +1,7 @@
 package mrak.simpledb.columns;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -11,17 +12,30 @@ public abstract class Column {
 	
 	private final String name;
 	private final Field field;
+	private final Field embeddedIn;
+	private final boolean isEmbedded;
 	
 	private final boolean key;
 	private final boolean generatedValue;
 	private final boolean foreignKey;
 	
-	public Column(String name, Field field, boolean key, boolean generatedValue, boolean foreignKey) {
+	public Column(String name, Field field, Field embeddedIn, boolean key, boolean generatedValue, boolean foreignKey) {
 		this.name = name;
 		this.field = field;
+		this.embeddedIn = embeddedIn;
+		this.isEmbedded = (embeddedIn != null);
 		this.key = key;
 		this.generatedValue = generatedValue;
 		this.foreignKey = foreignKey;
+		
+		// TODO check access strategy: field vs property
+		if(Modifier.isPrivate(field.getModifiers())) {
+			field.setAccessible(true);
+		}
+		
+		if(this.isEmbedded && Modifier.isPrivate(embeddedIn.getModifiers())) {
+			embeddedIn.setAccessible(true);
+		}		
 	}
 	
 	public String getName() {
@@ -45,9 +59,23 @@ public abstract class Column {
 	}
 	
 	public Object getFieldValue(Object entity) throws IllegalArgumentException, IllegalAccessException {
-		return field.get(entity);
+		if(isEmbedded) {
+			Object context = embeddedIn.get(entity);
+			return context != null ? field.get(context) : null;
+		}
+		else {
+			return field.get(entity);
+		}
 	}
-		
+	
+	public Field getEmbeddedIn() {
+		return embeddedIn;
+	}
+	
+	public boolean isEmbedded() {
+		return isEmbedded;
+	}
+
 	public abstract ColumnType getType();
 	
 	abstract public void setEntityValue(ResultSet rs, int index, Object entity) throws Exception;

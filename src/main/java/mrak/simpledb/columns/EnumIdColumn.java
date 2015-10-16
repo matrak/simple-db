@@ -11,8 +11,8 @@ public class EnumIdColumn extends Column {
 		int getId();
 	}
 	
-	public EnumIdColumn(String n, Field f, boolean key, boolean generatedValue, boolean foreignKey) {
-		super(n, f, key, generatedValue, foreignKey);
+	public EnumIdColumn(String n, Field f, Field embedded, boolean key, boolean generatedValue, boolean foreignKey) {
+		super(n, f, embedded, key, generatedValue, foreignKey);
 	}
 
 	@Override

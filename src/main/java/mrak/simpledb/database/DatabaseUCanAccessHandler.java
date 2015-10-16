@@ -12,7 +12,7 @@ import java.sql.SQLException;
  * (!) Since ucanaccess is not in any maven repo, all dependencies
  * are added locally to the projects classpath (libs/ucanacess/...).
  */
-public class DatabaseUCanAccessHandler implements DatabaseHandler {
+public class DatabaseUCanAccessHandler extends DatabaseDefaultHandler {
 	
 	private final String DRIVER = "net.ucanaccess.jdbc.UcanaccessDriver";
 	private final String ACCESS_CONNSTR = "jdbc:ucanaccess://%s";

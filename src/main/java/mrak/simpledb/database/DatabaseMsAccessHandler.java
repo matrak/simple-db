@@ -10,7 +10,7 @@ import java.sql.SQLException;
 /**
  * JDBC-ODBC Bridge has been removed in Java 8
  */
-public class DatabaseMsAccessHandler implements DatabaseHandler {
+public class DatabaseMsAccessHandler extends DatabaseDefaultHandler  {
 	
 	private final String DRIVER = "sun.jdbc.odbc.JdbcOdbcDriver";
 	private final String ACCESS_CONNSTR = 

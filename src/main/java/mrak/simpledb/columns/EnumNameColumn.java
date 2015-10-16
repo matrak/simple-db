@@ -6,13 +6,13 @@ import java.sql.ResultSet;
 
 public class EnumNameColumn extends Column {
 
-	public EnumNameColumn(String n, Field f, boolean key, boolean generatedValue, boolean foreignKey) {
-		super(n, f, key, generatedValue, foreignKey);
+	public EnumNameColumn(String n, Field f, Field embedded, boolean key, boolean generatedValue, boolean foreignKey) {
+		super(n, f, embedded, key, generatedValue, foreignKey);
 	}
 
 	@Override
 	public ColumnType getType() {
-		return ColumnType.ENUM_ORDINAL;
+		return ColumnType.ENUM_NAME;
 	}
 
 	@Override

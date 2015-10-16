@@ -43,6 +43,8 @@ public class SampleCreateTable {
 		System.out.println(createTable.getCreateTableSql(foobarMapping));
 		System.out.println(createTable.getCreateTableSql(bazMapping));
 		
+		if(true) return;
+		
 		URL databaseURL = SampleCreateTable.class.getResource("/office-2010-foobar_baz.accdb");		
 		DatabaseHandler database = new DatabaseUCanAccessHandler(databaseURL.getFile());
 		

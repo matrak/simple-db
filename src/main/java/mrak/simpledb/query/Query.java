@@ -22,8 +22,8 @@ public class Query<B> {
 	private int firstRow;
 	private int maxRows;
 	
-	public Query(DatabaseHandler handler, Mapping<B> m) {
-		this.map = m;
+	public Query(DatabaseHandler handler, Class<B> clazz) {
+		this.map = handler.getMapping(clazz);
 		this.database = handler;
 	}
 	
@@ -36,7 +36,6 @@ public class Query<B> {
 	}
 	
 	public void insert(B bean) throws Exception {
-
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO ")
 		   .append(map.getTableName())
@@ -59,7 +58,22 @@ public class Query<B> {
 				continue;
 			}
 			else {
-				Object val = column.getField().get(bean);
+				Object val = null;
+				if(column.isForeignKey()) 
+				{
+					Object foreign = column.getFieldValue(bean);
+					if(foreign != null) {
+						Mapping<?> foreignMapping = database.getMapping(foreign.getClass());
+						List<Column> foreignIds = foreignMapping.getKeyColumns();
+						// TODO add support to multiple ids
+						Column foreignId = foreignIds.get(0);
+						val = foreignId.getFieldValue(foreign);
+					}
+				}
+				else {
+					val = column.getFieldValue(bean);
+				}
+				
 				columnValues.add(val);
 				sql.append(column.getName()).append(",");
 				sqlValues.append("?,");
@@ -111,6 +125,7 @@ public class Query<B> {
 	
 	public long count(ConstrainChain<B> constrains) throws Exception 
 	{
+		
 		StringBuilder sql = new StringBuilder();
 		List<Column> keys = map.getKeyColumns();
 		sql.append("SELECT COUNT(");
@@ -179,7 +194,33 @@ public class Query<B> {
 			B bean = map.newBean();
 			int index = 1;
 			for (Column c : columns) {
-				c.setEntityValue(rs, index++, bean);
+				if(c.isForeignKey())
+				{
+					Mapping<?> foreignMapping = database.getMapping(c.getField().getType());
+					List<Column> foreignIds = foreignMapping.getKeyColumns();
+					// TODO support for multiple ids
+					Column foreignId = foreignIds.get(0);
+					Object foreign = foreignMapping.newBean();
+					foreignId.setEntityValue(rs, index, foreign);
+					
+					c.getField().set(bean, foreign);
+				}
+				else if(c.isEmbedded()) 
+				{
+					// TODO add support for nested embedded objects 
+					Object context = c.getEmbeddedIn().get(bean);
+					if(context == null) {
+						context = c.getEmbeddedIn().getType().newInstance();
+						c.getEmbeddedIn().set(bean, context);
+					}
+					c.setEntityValue(rs, index, context);
+				}
+				else 
+				{
+					
+					c.setEntityValue(rs, index, bean);
+				}
+				index++;
 			}
 			result.add(bean);
 		}

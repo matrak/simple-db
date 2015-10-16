@@ -15,11 +15,11 @@ import mrak.simpledb.columns.EnumIdColumn.EnumWithId;
 public enum ColumnType {
 	
 	UNKNOWN      (null, null),
-	BOOLEAN      ("b", BooleanColumn.class),
-	DATE         ("d", DateColumn.class),
-	TIMESTAMP    ("t", TimestampColumn.class),
-	STRING       ("s", StringColumn.class),
-	INTEGER      ("i", IntegerColumn.class),
+	BOOLEAN      ("b",    BooleanColumn.class),
+	DATE         ("d",    DateColumn.class),
+	TIMESTAMP    ("t",    TimestampColumn.class),
+	STRING       ("s",    StringColumn.class),
+	INTEGER      ("i",    IntegerColumn.class),
 	ENUM_ID      ("e_id", EnumIdColumn.class),
 	ENUM_NAME    ("e_n",  EnumNameColumn.class),
 	ENUM_ORDINAL ("e_o",  EnumOrdinalColumn.class);
@@ -37,16 +37,15 @@ public enum ColumnType {
 		return shortTypeName;
 	}
 	
-	public Column createColumn(String name, Field field, boolean isId, boolean isGeneratedValue, boolean isFk) throws Exception
+	public Column createColumn(String name, Field field, Field embeddedIn, boolean isId, boolean isGeneratedValue, boolean isFk) 
+			throws Exception
 	{
 		Constructor<?> constructor = this.columnClazz.getConstructors()[0];
-		return (Column) constructor.newInstance(name, field, isId, isGeneratedValue, isFk);
+		return (Column) constructor.newInstance(name, field, embeddedIn, isId, isGeneratedValue, isFk);
 	}
 	
 	public static ColumnType associatedType(Field f) 
 	{
-		// FIXME look for the ManyToOne and ManyToMany
-		
 		Class<?> type = f.getType();
 		if(type == Integer.class || type == Long.class || 
 		   type == int.class     || type == long.class) {
@@ -72,8 +71,13 @@ public enum ColumnType {
 			}
 			else {
 				Enumerated enumerated = f.getAnnotation(Enumerated.class);
-				EnumType value = enumerated.value();
-				return (value == EnumType.ORDINAL) ? ENUM_ORDINAL : ENUM_NAME;
+				if(enumerated == null) {
+					return ENUM_NAME;
+				}
+				else {
+					EnumType value = enumerated.value();
+					return (value == EnumType.ORDINAL) ? ENUM_ORDINAL : ENUM_NAME;
+				}
 			}
 		}
 		

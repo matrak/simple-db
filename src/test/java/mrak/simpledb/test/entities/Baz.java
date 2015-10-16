@@ -1,6 +1,6 @@
 package mrak.simpledb.test.entities;
 
-import java.sql.Date;
+import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,4 +20,28 @@ public class Baz {
 	
 	@ManyToOne
 	public FooBar foobar;
+	
+	public SampleEmbeddable embeddable;
+	
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder("Baz {\n");
+		b.append("\t id: ").append(id).append(",\n");
+		b.append("\t created: ").append(created).append(",\n");
+		b.append("\t foobar: ").append(foobar != null ? foobar.id : null).append(",\n");
+		b.append("\t embeddable: ").append(embeddableToStrign()).append("\n");
+		b.append("}");
+		return b.toString();
+	}
+	
+	private String embeddableToStrign() {
+		if(embeddable == null) { 
+			return null;
+		}
+		else {
+			return String.format("embeddable: { someStringValue: %s, someIntVlaue: %s }", 
+					embeddable.someStringValue, embeddable.someIntVlaue);
+		}
+		
+	}
 }
