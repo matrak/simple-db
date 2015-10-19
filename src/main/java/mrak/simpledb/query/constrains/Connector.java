@@ -8,4 +8,9 @@ public enum Connector implements ConstrainChainPart {
 	public ConstrainChainPartType getPartType() {
 		return ConstrainChainPartType.CONNECTOR;
 	}
+	
+	@Override
+	public String toString() {
+		return "Connector: {" + name() + "}";
+	}
 }

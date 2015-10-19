@@ -83,13 +83,19 @@ public abstract class Column {
 	abstract public void setPreparedStatementValue(PreparedStatement ps, int index, Object val) throws Exception;
 	
 	public static Column get(Mapping<?> m, String fieldName) {
-		return m.getColumnForFieldName(fieldName);
+		Column c = m.getColumnForFieldName(fieldName);
+		if(c == null) {
+			String mappingName = m != null ? m.getTableName() : "null";
+			String error = String.format("Could not retrive column for the fieldName %s in mapping %s", fieldName, mappingName);
+			throw new Error(error);
+		}
+		return c;
 	}
 	
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		b.append("Column : ").append(name).append(", type : ").append(getType().name()).append(", is ID : ").append(isKey());
+		b.append("Column : ").append(name).append(", type : ").append(getType().name()).append(", is id : ").append(isKey());
 		return b.toString();
 	}
 }

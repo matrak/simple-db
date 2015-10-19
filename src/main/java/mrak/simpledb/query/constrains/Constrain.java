@@ -37,6 +37,16 @@ public class Constrain<V> implements ConstrainChainPart {
 	public ConstrainChainPartType getPartType() {
 		return ConstrainChainPartType.CONSTRAIN;
 	}
-
+	
+	@Override
+	public String toString() {
+		StringBuilder b = new StringBuilder(this.getClass().getSimpleName());
+		b.append(" {\n")
+		 .append("column: ").append(column).append(",\n")
+		 .append("value: ").append(value).append(",\n")
+		 .append("operator: ").append(operator).append("\n")
+		 .append("}");
+		return b.toString();
+	}
 	
 }

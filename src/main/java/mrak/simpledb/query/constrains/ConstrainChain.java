@@ -51,7 +51,8 @@ public class ConstrainChain<B> implements ConstrainChainPart {
 	 */
 	public void appendConstrains(StringBuilder sql, boolean prependTableName) {
 
-		for (ConstrainChainPart ccp : cons) {
+		for (ConstrainChainPart ccp : cons) 
+		{
 			switch(ccp.getPartType()) {
 				case CHAIN:
 					sql.append(" (");
