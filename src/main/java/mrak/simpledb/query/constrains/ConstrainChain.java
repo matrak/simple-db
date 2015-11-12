@@ -67,9 +67,11 @@ public class ConstrainChain<B> implements ConstrainChainPart {
 					break;
 
 				case CONSTRAIN:
+					Constrain<?>  c = (Constrain<?>) ccp;
 					sql.append(prependTableName ? map.getTableName() + "." : "")
-					   .append(((Constrain<?>) ccp).getColumn().getName())
-					   .append("=?");
+					   .append(c.getColumn().getName())
+					   .append(c.getOperator())
+					   .append("?");
 					break;
 			}
 		}	

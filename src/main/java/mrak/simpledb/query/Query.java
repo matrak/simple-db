@@ -87,7 +87,7 @@ public class Query<B> {
 		
 		sql.append(sqlValues);
 		
-		sysout("insert", sql.toString());
+		_log_("insert", sql.toString());
 		
 		PreparedStatement ps = database.prepareInsert(generateId, sql.toString());
 		
@@ -98,6 +98,7 @@ public class Query<B> {
 			}
 			else {
 				Object value = columnValues.get((index - 1));
+				_log_("insert (set ps value)", column.getName() + " " + value);
 				column.setPreparedStatementValue(ps, index++, value);	
 			}
 		}
@@ -137,7 +138,7 @@ public class Query<B> {
 			constrains.appendConstrains(sql, false);
 		}
 		
-		sysout("count", sql);
+		_log_("count", sql);
 		
 		PreparedStatement ps = database.prepareStatement(sql.toString());
 		if(constrains != null && constrains.hasConstrains()) {
@@ -176,7 +177,7 @@ public class Query<B> {
 			sql.deleteCharAt(sql.length()-1);
 		}
 		
-		sysout("select", sql);
+		_log_("select", sql);
 		
 		PreparedStatement ps = database.prepareStatement(sql.toString());
 		if(constrains != null && constrains.hasConstrains()) {
@@ -253,7 +254,7 @@ public class Query<B> {
 		}
 		sql.delete(sql.length()- " AND ".length(), sql.length());
 		
-		sysout("select", sql);
+		_log_("select", sql);
 		
 		PreparedStatement ps = database.prepareStatement(sql.toString());
 		
@@ -276,7 +277,7 @@ public class Query<B> {
 			constrains.appendConstrains(sql, false);
 		}
 
-		sysout("delete", sql);
+		_log_("delete", sql);
 		
 		PreparedStatement ps = database.prepareStatement(sql.toString());
 		
@@ -291,6 +292,7 @@ public class Query<B> {
 		ps.executeUpdate();		
 	}
 	
+	// TODO update for ConstrainChain
 	public void update(B bean) throws Exception {
 
 		StringBuilder sql = new StringBuilder();
@@ -298,29 +300,45 @@ public class Query<B> {
 		
 		sql.append("UPDATE ").append(map.getTableName()).append(" SET ");
 		
-		// first index with in the "where" parameters 
-		int idIndex = 0;
+		// count all columns which are not in the WHERE statement
+		int whereIndex = 1;
 		List<Column> columns = map.getColumns();
 		for (Column column : columns) {
 			if(column.isKey()) {
 				where.append(column.getName()).append("=? AND ");
 			}
 			else {
-				idIndex++;
+				whereIndex++;
 				sql.append(column.getName()).append("=? ,");	
 			}
 		}
 		sql.deleteCharAt(sql.length()-1);
 		sql.append(" WHERE ").append(where.substring(0, where.length() - " AND ".length()));
 		
-		sysout("select", sql);
+		_log_("update", sql);
 		
 		PreparedStatement ps = database.prepareStatement(sql.toString());
 		
 		int index = 1;
 		for (Column column : columns) {
-			if(!column.isKey()) {
-				column.setPreparedStatementValue(ps, idIndex++, column.getFieldValue(bean));
+			
+			if(column.isKey()) 
+			{
+				column.setPreparedStatementValue(ps, whereIndex++, column.getFieldValue(bean));
+			}
+			else if(column.isForeignKey()) 
+			{
+				Object foreign = column.getFieldValue(bean);
+				Object foreignKeyValue = null;
+				if(foreign != null) {
+					Mapping<?> foreignMapping = database.getMapping(foreign.getClass());
+					List<Column> foreignIds = foreignMapping.getKeyColumns();
+					// TODO add support to multiple ids
+					Column foreignId = foreignIds.get(0);
+					foreignKeyValue = foreignId.getFieldValue(foreign);
+				}
+				
+				column.setPreparedStatementValue(ps, index++, foreignKeyValue);
 			}
 			else {
 				column.setPreparedStatementValue(ps, index++, column.getFieldValue(bean));
@@ -334,16 +352,15 @@ public class Query<B> {
 		ps.getConnection().close();
 	}
 	
-	private void sysout(String method, Object s) {
+	private void _log_(String method, Object s) {
 		if(DEBUG) {
-			System.out.print("Query->" + method + " :");
+			System.out.print("Query->" + method + " : ");
 			System.out.println(s);
 		}
 	}
 
-	private void sysout(String method, StringBuilder s) {
-		sysout(method, s.toString());
+	private void _log_(String method, StringBuilder s) {
+		_log_(method, s.toString());
 	}
-	
 	
 }
