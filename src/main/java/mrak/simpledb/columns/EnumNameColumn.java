@@ -22,6 +22,7 @@ public class EnumNameColumn extends Column {
 		}
 		else {
 			Enum<?> en = (Enum<?>) val;
+			System.out.println("Setting enum value " + en.name());
 			ps.setString(index, en.name());
 		}
 	}

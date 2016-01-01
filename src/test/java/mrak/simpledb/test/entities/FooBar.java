@@ -20,6 +20,7 @@ public class FooBar {
 	public Boolean testBoolean;
 	
 	public SampleEnum enumValue;
+	public SampleSimpleEnum enumSimpleValue;
 	
 	@OneToMany
 	public List<Baz> bazs;

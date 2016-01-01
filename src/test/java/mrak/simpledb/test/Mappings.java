@@ -33,7 +33,7 @@ public class Mappings {
 	static final DatabaseHandler DB;
 	
 	static {
-		URL databaseURL = MsAccessEmbeddableTest.class.getResource("/office_2010-simple-db-test.accdb");
+		URL databaseURL = MsAccessEmbeddableTest.class.getResource("/office-2007-foo-bar-baz.accdb");
 		try {
 			DB = new DatabaseUCanAccessHandler(databaseURL.getFile());
 			DB.registerMapping(Baz.class, BAZ);

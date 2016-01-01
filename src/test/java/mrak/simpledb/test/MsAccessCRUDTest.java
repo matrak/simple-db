@@ -6,16 +6,16 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.net.URL;
 import java.util.List;
 
 import mrak.simpledb.columns.Column;
 import mrak.simpledb.database.DatabaseHandler;
-import mrak.simpledb.database.DatabaseUCanAccessHandler;
 import mrak.simpledb.query.Query;
 import mrak.simpledb.query.constrains.Constrain;
 import mrak.simpledb.query.constrains.ConstrainChain;
 import mrak.simpledb.test.entities.FooBar;
+import mrak.simpledb.test.entities.SampleEnum;
+import mrak.simpledb.test.entities.SampleSimpleEnum;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,6 +40,8 @@ public class MsAccessCRUDTest {
 		FooBar insertFooBar = new FooBar();
 		insertFooBar.testBoolean = Boolean.FALSE;
 		insertFooBar.testString = "Test String";
+		insertFooBar.enumSimpleValue = SampleSimpleEnum.VAL_1;
+		insertFooBar.enumValue = SampleEnum.VAL_2;
 		foobarQuery.insert(insertFooBar);
 		
 		// test select by id
@@ -59,7 +61,9 @@ public class MsAccessCRUDTest {
 		List<FooBar> selectByTestStringList = foobarQuery.select(selectByTestString);
 		
 		selectedFoBar = selectByTestStringList.get(0);
-		assertSame(insertFooBar.testString, insertFooBar.testString);
+		assertSame(insertFooBar.testString,      selectedFoBar.testString);
+		assertSame(insertFooBar.enumSimpleValue, selectedFoBar.enumSimpleValue);
+		assertSame(insertFooBar.enumValue,       selectedFoBar.enumValue);
 		
 		// test select by string and id
 		ConstrainChain<FooBar> selectByTestStringAndId = new ConstrainChain<>(FOO_BAR);
@@ -71,8 +75,8 @@ public class MsAccessCRUDTest {
 		List<FooBar> selectByTestStringAndIdList = foobarQuery.select(selectByTestStringAndId);
 		
 		selectedFoBar = selectByTestStringAndIdList.get(0);
-		assertSame(insertFooBar.testString, insertFooBar.testString);
-		assertSame(insertFooBar.id, insertFooBar.id);
+		assertSame(insertFooBar.testString, selectedFoBar.testString);
+		assertSame(insertFooBar.id,         selectedFoBar.id);
 		
 		// test delete by string and id
 		foobarQuery.delete(selectByTestStringAndId);

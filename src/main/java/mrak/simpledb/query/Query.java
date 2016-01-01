@@ -19,8 +19,9 @@ public class Query<B> {
 	private final Mapping<B> map;
 	private final DatabaseHandler database;
 	
-	private int firstRow;
-	private int maxRows;
+	private int firstRow = -1;
+	private int maxRows = -1;
+	private DbEngine engine = DbEngine.MSACCESS;
 	
 	public Query(DatabaseHandler handler, Class<B> clazz) {
 		this.map = handler.getMapping(clazz);
@@ -98,7 +99,7 @@ public class Query<B> {
 			}
 			else {
 				Object value = columnValues.get((index - 1));
-				_log_("insert (set ps value)", column.getName() + " " + value);
+				_log_("insert (set ps value)", column.getName() + " index " + (index) + " " + value);
 				column.setPreparedStatementValue(ps, index++, value);	
 			}
 		}
@@ -126,7 +127,6 @@ public class Query<B> {
 	
 	public long count(ConstrainChain<B> constrains) throws Exception 
 	{
-		
 		StringBuilder sql = new StringBuilder();
 		List<Column> keys = map.getKeyColumns();
 		sql.append("SELECT COUNT(");
@@ -157,24 +157,56 @@ public class Query<B> {
 	
 	public List<B> select(ConstrainChain<B> constrains, OrderBy... orderBy) throws Exception {
 		
-		List<Column> columns = map.getColumns();
+		boolean hasConstrains = constrains != null && constrains.hasConstrains();
+		boolean hasOrderBy = orderBy != null && orderBy.length > 0;
+		
+		String orderByString = null;
+		if(hasOrderBy) {
+			StringBuilder b = new StringBuilder();
+			for (OrderBy ob : orderBy) {
+				b.append(ob.getColumn().getName()).append(ob.isAsc() ? " ASC" : " DESC").append(",");
+			}
+			b.deleteCharAt(b.length() - 1);
+			orderByString = b.toString();
+		} 
+		
 		StringBuilder sql = new StringBuilder();
 		
 		sql.append("SELECT ");
-		appendColumnNames(columns, sql);
+		if(maxRows > -1 && engine == DbEngine.MSACCESS) {
+			sql.append("TOP ").append(maxRows).append(" ");
+		}
+		appendColumnNames(map.getColumns(), sql);
 		sql.append(" FROM ").append(map.getTableName());
 		
-		if(constrains != null && constrains.hasConstrains()) {
+		if(hasConstrains) {
 			sql.append(" WHERE ");
 			constrains.appendConstrains(sql, false);
 		}
-		
-		if(orderBy != null && orderBy.length > 0) {
-			sql.append(" ORDER BY ");
-			for (OrderBy ob : orderBy) {
-				sql.append(ob.getColumn().getName()).append(ob.isAsc() ? "ASC" : "DESC").append(",");
+
+		// AND ( (key columns) not in (select top OFFSET key columns from table where WHERE order by))
+		boolean hasSubQuery = false;
+		if(firstRow > 0 && engine == DbEngine.MSACCESS && hasOrderBy) {
+			if(hasConstrains) sql.append(" AND ((");
+			else sql.append(" WHERE ((");
+			appendColumnNames(map.getKeyColumns(), sql);
+			sql.append(") NOT IN (SELECT TOP ").append(firstRow).append(" ");
+			appendColumnNames(map.getKeyColumns(), sql);
+			sql.append(" FROM ").append(map.getTableName());
+			
+			// FIXME will not work, see setPreparedStatementValue
+			if(hasConstrains) {
+				hasSubQuery = true;
+				sql.append(" WHERE ");
+				constrains.appendConstrains(sql, false);
 			}
-			sql.deleteCharAt(sql.length()-1);
+			
+			sql.append(" ORDER BY ").append(orderByString).append(")");
+			sql.append(")");
+		}		
+		
+		if(hasOrderBy) {
+			sql.append(" ORDER BY ").append(orderByString);
 		}
 		
 		_log_("select", sql);
@@ -186,6 +218,12 @@ public class Query<B> {
 				Column c = con.getColumn();
 				c.setPreparedStatementValue(ps, index++, con.getValue());
 			}
+			if(hasSubQuery) {
+				for (Constrain<B> con : constrains.getConstrains()) {
+					Column c = con.getColumn();
+					c.setPreparedStatementValue(ps, index++, con.getValue());
+				}	
+			}
 		}
 		
 		ResultSet rs = ps.executeQuery();
@@ -194,7 +232,7 @@ public class Query<B> {
 		while (rs.next()) {
 			B bean = map.newBean();
 			int index = 1;
-			for (Column c : columns) {
+			for (Column c : map.getColumns()) {
 				if(c.isForeignKey())
 				{
 					Mapping<?> foreignMapping = database.getMapping(c.getField().getType());
@@ -236,7 +274,7 @@ public class Query<B> {
 		b.deleteCharAt(b.length()-1);
 	}
 	
-	public void delete(B bean) throws Exception {
+	public void deleteBean(B bean) throws Exception {
 		
 		StringBuilder sql = new StringBuilder();
 		sql.append("DELETE FROM ");
