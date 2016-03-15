@@ -85,6 +85,11 @@ public class ConstrainChain<B> implements ConstrainChainPart {
 			if(p.getPartType() == ConstrainChainPartType.CONSTRAIN) {
 				c.add((Constrain<B>) p);
 			}
+			else if(p.getPartType() == ConstrainChainPartType.CHAIN) {
+				ConstrainChain<B> cc = (ConstrainChain<B>) p;
+				List<Constrain<B>>  subConstrains = (List<Constrain<B>>) cc.getConstrains();
+				c.addAll(subConstrains);
+			}
 		}
 		return c;
 	}
